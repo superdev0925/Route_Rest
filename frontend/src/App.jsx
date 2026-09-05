@@ -6,6 +6,8 @@ import StopsTimeline from "./components/StopsTimeline";
 import LogSheets from "./components/LogSheets";
 import ComplianceCard from "./components/ComplianceCard";
 import RouteInstructions from "./components/RouteInstructions";
+import ResultsNav from "./components/ResultsNav";
+import TripBrief from "./components/TripBrief";
 import { planTrip } from "./api";
 
 function TruckIcon() {
@@ -113,11 +115,11 @@ export default function App() {
                     <path d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-.553-.894L15 4m0 13V4m0 0L9 7" />
                   </svg>
                 </div>
-                <h3>Plan your first trip</h3>
+                <h3>Plan a trip to see the map and logs</h3>
                 <p>
-                  Enter your locations and current cycle hours above, and we'll
-                  map the route with required rest stops and draw your daily ELD
-                  log sheets.
+                  Enter three U.S. cities and your cycle hours, or tap a sample
+                  route above. We’ll draw the route, required stops, and a
+                  filled FMCSA daily log for each day.
                 </p>
               </div>
             </div>
@@ -125,41 +127,35 @@ export default function App() {
 
           {plan && (
             <>
-              {/* Brief site intro above the map */}
-              <div className="site-intro">
-                <h2>Your trip, mapped and logged.</h2>
-                <p>
-                  RouteRest turns your route and remaining cycle hours into a
-                  complete, HOS-compliant plan — every fuel stop, 30-minute
-                  break, and 10-hour rest, plus ready-to-submit daily ELD logs.
-                </p>
-              </div>
+              <ResultsNav />
+              <TripBrief plan={plan} />
 
-              {/* Route Map on top, full width */}
-              <div className="card">
+              <div className="card" id="section-map">
                 <div className="card-header">
                   <h2>Route Map</h2>
                   <span className="sub">
-                    OpenStreetMap · {Math.round(plan.summary.total_distance_miles)} mi
+                    OpenStreetMap · {Math.round(plan.summary.total_distance_miles)} mi · stops &amp; rests
                   </span>
                 </div>
                 <RouteMap plan={plan} />
               </div>
 
-              {/* Turn-by-turn driving directions */}
-              <RouteInstructions plan={plan} />
+              <div id="section-directions">
+                <RouteInstructions plan={plan} />
+              </div>
 
-              {/* HOS compliance summary */}
-              <ComplianceCard items={plan.compliance} />
+              <div id="section-compliance">
+                <ComplianceCard items={plan.compliance} />
+              </div>
 
-              {/* Trip Summary (left) + Itinerary & Stops (right) */}
-              <div className="results-split">
+              <div className="results-split" id="section-itinerary">
                 <TripSummary summary={plan.summary} />
                 <StopsTimeline stops={plan.stops} />
               </div>
 
-              {/* Daily Log Sheets full width */}
-              <LogSheets dailyLogs={plan.daily_logs} meta={logMeta} />
+              <div id="section-logs">
+                <LogSheets dailyLogs={plan.daily_logs} meta={logMeta} />
+              </div>
             </>
           )}
         </div>

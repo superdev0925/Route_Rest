@@ -95,7 +95,7 @@ function Leg({ title, from, to, steps }) {
 }
 
 export default function RouteInstructions({ plan }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const legs = plan.route?.legs || [];
   const hasSteps = legs.some((l) => (l.steps || []).length);
   if (!hasSteps) return null;
