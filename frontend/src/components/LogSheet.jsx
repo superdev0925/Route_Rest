@@ -1,4 +1,4 @@
-import { fmtDate, STATUS_META } from "../utils";
+import { fmtDate, placeRemark, STATUS_META } from "../utils";
 
 // ---- Grid geometry (SVG user units) ----
 const GRID_LEFT = 118;
@@ -25,7 +25,6 @@ const STATUS_ORDER = ["off_duty", "sleeper_berth", "driving", "on_duty"];
 const X = (hour) => GRID_LEFT + hour * HOUR_W;
 const rowCenterY = (row) => GRID_TOP + row * ROW_H + ROW_H / 2;
 
-const cityOf = (loc) => (loc ? loc.split(",")[0].trim() : "");
 
 const HOUR_LABELS = [
   "Mid", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11",
@@ -59,9 +58,9 @@ export default function LogSheet({ day, index, total, meta = {} }) {
   segments.forEach((seg) => {
     const row = STATUS_META[seg.status]?.row ?? 0;
     if (row !== prevRow) {
-      const city = cityOf(seg.location);
-      if (city) {
-        remarks.push({ hour: seg.start_hour, city });
+      const place = placeRemark(seg.location);
+      if (place) {
+        remarks.push({ hour: seg.start_hour, city: place });
       }
       prevRow = row;
     }
@@ -353,11 +352,11 @@ export default function LogSheet({ day, index, total, meta = {} }) {
                 <span className="rv">{fmt(recap.on_duty_today)}</span>
               </td>
               <td>
-                <span className="ab">A.</span> On duty last 7 days incl. today
+                <span className="ab">A.</span> On duty last 8 days incl. today
                 <span className="rv">{fmt(recap.cycle_total)}</span>
               </td>
               <td>
-                <span className="ab">A.</span> On duty last 8 days incl. today
+                <span className="ab">A.</span> On duty last 7 days incl. today
                 <span className="rv">—</span>
               </td>
             </tr>
