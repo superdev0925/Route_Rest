@@ -42,6 +42,79 @@ export const STATUS_META = {
   on_duty: { label: "On Duty (Not Driving)", color: "#f59e0b", row: 3 },
 };
 
+const STATE_ABBR = {
+  alabama: "AL",
+  alaska: "AK",
+  arizona: "AZ",
+  arkansas: "AR",
+  california: "CA",
+  colorado: "CO",
+  connecticut: "CT",
+  delaware: "DE",
+  florida: "FL",
+  georgia: "GA",
+  hawaii: "HI",
+  idaho: "ID",
+  illinois: "IL",
+  indiana: "IN",
+  iowa: "IA",
+  kansas: "KS",
+  kentucky: "KY",
+  louisiana: "LA",
+  maine: "ME",
+  maryland: "MD",
+  massachusetts: "MA",
+  michigan: "MI",
+  minnesota: "MN",
+  mississippi: "MS",
+  missouri: "MO",
+  montana: "MT",
+  nebraska: "NE",
+  nevada: "NV",
+  "new hampshire": "NH",
+  "new jersey": "NJ",
+  "new mexico": "NM",
+  "new york": "NY",
+  "north carolina": "NC",
+  "north dakota": "ND",
+  ohio: "OH",
+  oklahoma: "OK",
+  oregon: "OR",
+  pennsylvania: "PA",
+  "rhode island": "RI",
+  "south carolina": "SC",
+  "south dakota": "SD",
+  tennessee: "TN",
+  texas: "TX",
+  utah: "UT",
+  vermont: "VT",
+  virginia: "VA",
+  washington: "WA",
+  "west virginia": "WV",
+  wisconsin: "WI",
+  wyoming: "WY",
+  "district of columbia": "DC",
+};
+
+const STATE_ABBR_SET = new Set(Object.values(STATE_ABBR));
+
+/** City + state abbreviation for FMCSA remarks (e.g. "Richmond, VA"). */
+export function placeRemark(loc) {
+  if (!loc) return "";
+  const parts = loc.split(",").map((p) => p.trim()).filter(Boolean);
+  if (!parts.length) return "";
+  const city = parts[0];
+  for (let i = 1; i < parts.length; i += 1) {
+    const part = parts[i];
+    if (part.length === 2 && STATE_ABBR_SET.has(part.toUpperCase())) {
+      return `${city}, ${part.toUpperCase()}`;
+    }
+    const abbr = STATE_ABBR[part.toLowerCase()];
+    if (abbr) return `${city}, ${abbr}`;
+  }
+  return city;
+}
+
 export const STOP_META = {
   start: { color: "#0b1729", icon: "▶" },
   pickup: { color: "#16a34a", icon: "⬆" },
