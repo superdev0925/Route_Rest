@@ -1,107 +1,135 @@
-# 🚛 RouteRest — HOS-Compliant Trip Planner & ELD Log Generator
+<div align="center">
 
-RouteRest helps U.S. truck drivers plan a trip that stays within the federal
-**Hours-of-Service (HOS)** rules. You enter where you are, where to pick up and
-drop off, and how many cycle hours you've already used — and RouteRest returns:
+# RouteRest
 
-- an **interactive route map** with every required stop (fuel, breaks, rests), and
-- **filled-out daily ELD log sheets**, one per day, in the official FMCSA format.
+**Plan the drive. Stay inside the hours. Print the logs.**
 
-| | |
-|---|---|
-| **Live app** | https://route-rest.vercel.app/ |
+A Django + React trip planner for U.S. property-carrying drivers on the
+federal 70-hour / 8-day Hours-of-Service cycle.
 
----
+[Live demo](https://route-rest.vercel.app/)
+·
+[Source](https://github.com/superdev0925/Route_Rest)
 
-## 📸 Screenshots
-
-**Plan a trip**
-
-![RouteRest home](docs/hero.png)
-
-**Route map, trip summary & itinerary**
-
-![Route and summary](docs/results.png)
-
-**Auto-generated daily ELD log sheet**
-
-![ELD log sheet](docs/logsheet.png)
+</div>
 
 ---
 
-## ✨ What it does
+```
+  current ──► pickup ──► drop-off
+                 │
+                 ▼
+     map · directions · stops · daily ELD sheets
+```
 
-- **Four simple inputs** — current location, pickup, drop-off, and current cycle
-  hours used.
-- **U.S. city autocomplete** — start typing and pick a location; no need to type
-  full addresses.
-- **Route map** — the full driving route with colored markers for the start,
-  pickup, and drop-off, plus smaller markers for fuel stops, breaks, and rests.
-- **Turn-by-turn directions** — plain-English driving instructions for each leg
-  ("Merge onto I-10 E", "Take the ramp…") with per-step mileage.
-- **Trip summary** — total distance, driving time, on-duty time, number of log
-  days, fuel stops, rests, and the cycle hours used at the end of the trip.
-- **Itinerary** — every stop with arrival time and trip mileage.
-- **Daily ELD log sheets** — drawn in the official *Driver's Daily Log* grid
-  format, one per calendar day, with the carrier, equipment, shipping, remarks
-  and end-of-day recap fields filled in. Longer trips automatically produce
-  multiple sheets.
-- **Download as PDF** — export the daily logs to a clean, printable PDF.
+Four inputs. A full interstate plan: route geometry, required fuel and rest,
+turn-by-turn instructions, and one filled FMCSA *Driver's Daily Log* per
+calendar day.
 
----
-
-## 🧭 How the plan stays compliant
-
-RouteRest assumes a **property-carrying driver on the 70-hour / 8-day cycle** (no
-adverse driving conditions) and automatically schedules the trip around these
-federal limits:
-
-| Rule | What RouteRest does |
-|------|---------------------|
-| **11-hour driving limit** | Caps driving at 11 hours per shift, then schedules a 10-hour rest. |
-| **14-hour on-duty window** | Stops driving once 14 hours have passed since the shift began. |
-| **30-minute break** | Inserts a break after 8 cumulative hours of driving. |
-| **70-hour / 8-day cycle** | Tracks the running cycle starting from the hours you enter. |
-| **34-hour restart** | Adds a 34-hour restart automatically when the cycle is exhausted. |
-| **Fueling** | Schedules a fuel stop at least every 1,000 miles. |
-| **Pickup & drop-off** | Allows 1 hour of on-duty time for each. |
-
-Driving time is based on an average speed of **55 mph**, and each daily log
-sheet always totals a full 24 hours.
+| Input | Output |
+| --- | --- |
+| Current location | Interactive map with start, pickup, drop-off, fuel, breaks, rests |
+| Pickup location | Turn-by-turn driving instructions (OSRM) |
+| Drop-off location | Itinerary with arrival time and trip miles |
+| Current cycle used (0–70 h) | Drawn, printable daily log sheets — several on long hauls |
 
 ---
 
-## 🗺️ Built with
+## Preview
 
-- **Backend** — Django + Django REST Framework (the Hours-of-Service planning
-  engine)
-- **Frontend** — React
-- **Maps & data** — OpenStreetMap, with routing by OSRM and geocoding by
-  Nominatim (all free, no API keys)
+| Planning | Route & itinerary | Daily log |
+| :---: | :---: | :---: |
+| ![Home](docs/hero.png) | ![Results](docs/results.png) | ![Log sheet](docs/logsheet.png) |
+
+Try the built-in samples on the live site: **Short haul**, **Midwest**, or
+**Cross-country** (Los Angeles → Denver → Chicago) to see multiple log days.
 
 ---
 
-## ▶️ Running it locally (optional)
+## Hours of Service
 
-Two terminals:
+The engine follows the assessment profile: property-carrying CMV, 70/8,
+no adverse-conditions exception. Driving time is estimated at **55 mph**.
+Each log sheet is padded so the grid totals **24 hours**.
+
+| Limit | How RouteRest applies it |
+| --- | --- |
+| 11-hour driving | Caps a shift, then a 10-hour sleeper rest |
+| 14-hour window | Clock starts at first work; no driving after hour 14 |
+| 30-minute break | Required after 8 hours of driving. Fuel, loading, or unloading (≥ 30 min on duty) counts; otherwise an off-duty stop is inserted |
+| 70-hour / 8-day | Remaining hours come from the form. A 34-hour restart is added if the trip would exceed 70 |
+| Fuel | On-duty stop at least every 1,000 miles |
+| Pickup / drop-off | 1 hour on duty each |
+
+This is a planning aid, not legal HOS advice.
+
+---
+
+## Stack
+
+| Layer | Choice |
+| --- | --- |
+| API | Django 5, Django REST Framework, SQLite (Postgres via `DATABASE_URL`) |
+| UI | React 18, Vite, Leaflet |
+| Geo | Photon (autocomplete), Nominatim (geocode), OSRM public demo (routing) |
+| Hosting | Vercel (frontend), Render or any WSGI host (backend) |
+
+No paid map keys. Nominatim requires a descriptive User-Agent in production.
+
+```
+React  ──POST /api/plan/──►  Django
+  │                            │
+  │                            ├─ Nominatim × 3
+  │                            ├─ OSRM  current → pickup → drop-off
+  │                            └─ HOSPlanner  → Trip.plan JSON
+  ▼
+map · directions · compliance · SVG logs
+```
+
+---
+
+## Run locally
+
+**Backend** — http://127.0.0.1:8000
 
 ```bash
-# 1) Backend  (http://127.0.0.1:8000)
 cd backend
 python -m venv venv
-venv\Scripts\activate        # Windows  ·  source venv/bin/activate on macOS/Linux
+venv\Scripts\activate          # macOS / Linux: source venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
+```
 
-# 2) Frontend  (http://127.0.0.1:5173)
+**Frontend** — http://127.0.0.1:5173
+
+```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Then open **http://127.0.0.1:5173** and plan a trip.
+The UI talks to `http://127.0.0.1:8000` unless you set `VITE_API_URL`.
+Copy `backend/.env.example` and `frontend/.env.example` only if you need
+overrides.
 
 ---
 
-_RouteRest is a planning aid and demonstration, not legal HOS advice._
+## Project layout
+
+```
+backend/trips/services/hos_planner.py   HOS simulation
+backend/trips/services/routing.py       OSRM + turn-by-turn
+backend/trips/services/geocoding.py     Photon / Nominatim
+backend/trips/views.py                  POST /api/plan/  GET /api/geocode/
+frontend/src/components/LogSheet.jsx    FMCSA grid
+frontend/src/components/RouteMap.jsx    Leaflet route + stops
+```
+
+---
+
+<div align="center">
+
+FMCSA 49 CFR Part 395 · property carrier · 70 hr / 8 day
+
+</div>
