@@ -33,7 +33,7 @@
   --radius-sm: 0;
   --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Helvetica, Arial, sans-serif;
-  /* unified: everything uses the same family */
+  --display: "Instrument Serif", Georgia, "Times New Roman", serif;
   --mono: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Helvetica, Arial, sans-serif;
 }
@@ -449,11 +449,11 @@ body::before {
 }
 
 .hero-title {
-  font-family: var(--font);
-  font-size: clamp(2.1rem, 3.6vw, 3.3rem);
+  font-family: var(--display);
+  font-size: clamp(2.35rem, 4.2vw, 3.55rem);
   line-height: 1.08;
-  font-weight: 800;
-  text-transform: uppercase;
+  font-weight: 400;
+  text-transform: none;
   letter-spacing: -0.02em;
   margin: 0 0 28px;
   color: #fff;
@@ -651,6 +651,62 @@ body::before {
 .hero-chip:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.field-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.55rem;
+  height: 1.15rem;
+  margin-right: 7px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.22);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: var(--amber-light);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  vertical-align: 1px;
+}
+
+.cycle-meter {
+  margin-top: 10px;
+}
+
+.cycle-meter-bar {
+  height: 6px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+}
+
+.cycle-meter-fill {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #34d399, var(--amber-light));
+  transition: width 0.25s ease, background 0.2s ease;
+}
+
+.cycle-meter.warm .cycle-meter-fill {
+  background: linear-gradient(90deg, var(--amber-light), #fb923c);
+}
+
+.cycle-meter.hot .cycle-meter-fill {
+  background: linear-gradient(90deg, #fb923c, #ef4444);
+}
+
+.cycle-meter-legend {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
 }
 
 /* ---------- Driver intro (right side of the hero) ---------- */
@@ -1330,7 +1386,168 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: 26px;
-  margin: 50px 100px
+  margin: 50px 100px;
+}
+
+.results .card,
+.results .results-split .card {
+  border-radius: 14px;
+  border: 1px solid var(--slate-200);
+  box-shadow: var(--shadow);
+}
+
+#section-map,
+#section-directions,
+#section-compliance,
+#section-itinerary,
+#section-logs {
+  scroll-margin-top: 118px;
+}
+
+.results-nav {
+  position: sticky;
+  top: 68px;
+  z-index: 40;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--slate-200);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.results-nav button {
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--navy-700);
+  background: var(--slate-50);
+  border: 1px solid var(--slate-200);
+  border-radius: 999px;
+  padding: 7px 13px;
+  cursor: pointer;
+}
+
+.results-nav button:hover {
+  background: var(--navy-800);
+  color: #fff;
+  border-color: var(--navy-800);
+}
+
+.trip-brief {
+  display: grid;
+  gap: 18px;
+  padding: 22px 26px 20px;
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 40%),
+    linear-gradient(115deg, #0f1e36 0%, #16304f 55%, #1e3a5f 100%);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow);
+}
+
+.trip-brief-kicker {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--amber-light);
+}
+
+.trip-brief-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.trip-brief-route {
+  font-family: var(--display);
+  font-size: clamp(1.45rem, 2.6vw, 2.1rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.trip-brief-arrow {
+  margin: 0 10px;
+  color: var(--amber-light);
+}
+
+.trip-brief-status {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(16, 185, 129, 0.16);
+  color: #6ee7b7;
+  white-space: nowrap;
+}
+
+.trip-brief-status.bad {
+  background: rgba(239, 68, 68, 0.16);
+  color: #fca5a5;
+}
+
+.trip-brief-kpis {
+  list-style: none;
+  margin: 0;
+  padding: 14px 0 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trip-brief-kpis li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.trip-brief-kpis strong {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-feature-settings: "tnum";
+}
+
+.trip-brief-kpis small {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--slate-400);
+}
+
+.trip-brief-kpis span {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--slate-400);
+}
+
+@media (max-width: 900px) {
+  .results {
+    margin: 28px 16px 48px;
+  }
+
+  .results-nav {
+    top: 58px;
+  }
+
+  .trip-brief-kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 /* Trip Summary (left) + Itinerary & Stops (right), below the map */
@@ -1386,8 +1603,9 @@ body::before {
 .placeholder h3 {
   margin: 0 0 8px;
   color: var(--navy-800);
-  font-size: 1.25rem;
-  font-weight: 800;
+  font-family: var(--display);
+  font-size: 1.7rem;
+  font-weight: 400;
   letter-spacing: -0.02em;
 }
 
@@ -1456,7 +1674,7 @@ body::before {
 
 /* map */
 .map-wrap {
-  height: 460px;
+  height: 540px;
   width: 100%;
   position: relative;
 }
@@ -2505,11 +2723,14 @@ body::before {
   }
   .topbar,
   .form,
+  .form-hero,
   .day-tabs,
   .print-btn-row,
   .footer,
   .map-wrap,
-  .card-header {
+  .card-header,
+  .results-nav,
+  .trip-brief {
     display: none !important;
   }
   .layout {
