@@ -79,10 +79,27 @@ class HOSPlannerTests(TestCase):
         self.assertGreaterEqual(plan["summary"]["fuel_stops"], 2)
 
     def test_30_minute_break_inserted(self):
-        # ~9h of continuous driving forces a 30-minute break.
+        # ~9h of continuous driving with no on-duty stop in between
+        # still requires a dedicated 30-minute interruption.
         plan = make_plan(500, 0.0)
         labels = [s["label"] for s in plan["segments"]]
         self.assertIn("30-minute break", labels)
+
+    def test_pickup_satisfies_30_minute_break(self):
+        # 385 mi ≈ 7.0 h to pickup, then 1 h loading (qualifies as the
+        # 30-min interruption), then 200 mi ≈ 3.6 h. No extra coffee stop.
+        plan = make_plan(385, 200)
+        labels = [s["label"] for s in plan["segments"]]
+        self.assertNotIn("30-minute break", labels)
+        self.assertTrue(all(item["ok"] for item in plan["compliance"]))
+
+    def test_second_leg_needs_no_break_after_pickup(self):
+        # 200 mi then 1 h loading resets the break clock, so a 7 h
+        # second leg stays legal without a dedicated off-duty stop.
+        plan = make_plan(200, 385)
+        labels = [s["label"] for s in plan["segments"]]
+        self.assertNotIn("30-minute break", labels)
+        self.assertTrue(all(item["ok"] for item in plan["compliance"]))
 
     def test_cycle_limit_triggers_restart(self):
         # Start with 68h used; a multi-day trip must trigger a 34h restart.

@@ -7,6 +7,7 @@ adverse driving conditions:
   * 11-hour driving limit per shift
   * 14-hour on-duty "driving window" per shift
   * 30-minute break required after 8 cumulative hours of driving
+    (may be off duty, sleeper, or on-duty not driving — fuel/loading count)
   * 70-hour / 8-day on-duty limit (with optional 34-hour restart)
   * 10 consecutive hours off duty to reset the daily limits
 
@@ -216,6 +217,10 @@ class HOSPlanner:
         self._add_segment(ON_DUTY, hours, label, location)
         s.window_used += hours
         s.cycle_used += hours
+        # §395.3(a)(3)(ii): a 30-minute interruption of driving may be on
+        # duty (fueling, loading, paperwork), off duty, or sleeper.
+        if hours + EPS >= BREAK_DURATION:
+            s.drive_since_break = 0.0
         if kind:
             s.stops.append(Stop(
                 kind=kind,
@@ -246,9 +251,14 @@ class HOSPlanner:
             ):
                 self._take_daily_reset(dest_location)
                 continue
-            # 3. 8 hours of driving since last break -> 30-minute break.
+            # 3. 8 hours of driving since last break -> 30-minute interruption.
+            # Prefer a due fuel stop (on-duty) over a dedicated off-duty stop.
             if s.drive_since_break >= DRIVE_BEFORE_BREAK - EPS:
-                self._take_break(dest_location)
+                miles_to_fuel = MILES_BETWEEN_FUEL - s.miles_since_fuel
+                if miles_to_fuel <= EPS:
+                    self._fuel_stop(dest_location)
+                else:
+                    self._take_break(dest_location)
                 continue
 
             # How long can we legally drive in one continuous push?
@@ -430,7 +440,11 @@ def _check_compliance(segments: list, stops: list, cycle_end: float) -> list:
             max_window = max(max_window, window)
             if drive_since_break > DRIVE_BEFORE_BREAK + 1e-3:
                 break_respected = False
-        elif seg.status == OFF_DUTY and "30-minute" in seg.label:
+        elif (
+            seg.status in (OFF_DUTY, SLEEPER, ON_DUTY)
+            and seg.hours + 1e-3 >= BREAK_DURATION
+        ):
+            # Off-duty coffee stop, sleeper, or on-duty fuel/loading.
             drive_since_break = 0.0
     max_drive = max(max_drive, drive_in_shift)
 
@@ -463,7 +477,7 @@ def _check_compliance(segments: list, stops: list, cycle_end: float) -> list:
         {
             "label": "30-minute break after 8 h driving",
             "ok": break_respected,
-            "detail": "break inserted before the 8-hour mark",
+            "detail": "30-min non-driving (off duty or on duty) before 8 h",
         },
         {
             "label": "Fuel stop at least every 1,000 mi",
