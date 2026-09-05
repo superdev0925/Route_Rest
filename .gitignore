@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+env/
+*.sqlite3
+db.sqlite3
+backend/staticfiles/
+
+# Environment
+.env
+.env.local
+
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Misc / temp scratch files
+_*
+*.tmp
+
+# Screenshots / smoke-test output (keep committed docs + public assets)
+test-results/
+playwright-report/
+*.png
+!frontend/public/*.svg
+!frontend/public/*.png
+!docs/*.png

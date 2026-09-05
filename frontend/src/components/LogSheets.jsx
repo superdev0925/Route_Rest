@@ -1,0 +1,92 @@
+import { useState } from "react";
+import LogSheet from "./LogSheet";
+
+export default function LogSheets({ dailyLogs, meta }) {
+  const [active, setActive] = useState(0);
+  const [showAll, setShowAll] = useState(false);
+
+  if (!dailyLogs?.length) return null;
+
+  // For a clean PDF we print every day. Reveal all sheets, let React paint,
+  // then open the browser's print/save-as-PDF dialog.
+  const handlePdf = () => {
+    setShowAll(true);
+    setTimeout(() => window.print(), 120);
+  };
+
+  return (
+    <div className="card logsheets-card">
+      <div className="card-header">
+        <h2>Daily Log Sheets</h2>
+        <span className="sub">
+          {dailyLogs.length} day{dailyLogs.length > 1 ? "s" : ""} · FMCSA RODS
+        </span>
+      </div>
+      <div className="card-body">
+        <div className="projected-note">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 8h.01M11 12h1v4h1" />
+          </svg>
+          <span>
+            These sheets are a <strong>projected plan</strong> for the trip
+            ahead, starting today at 8:00 AM. Future days are simulated assuming
+            the driver follows the recommended schedule — they fill in as the
+            trip is actually driven.
+          </span>
+        </div>
+
+        <div className="print-btn-row" style={{ gap: 8 }}>
+          <button
+            className="btn secondary"
+            style={{ width: "auto", padding: "8px 14px" }}
+            onClick={() => setShowAll((v) => !v)}
+          >
+            {showAll ? "Show one day" : "Show all days"}
+          </button>
+          <button
+            className="btn secondary"
+            style={{ width: "auto", padding: "8px 14px" }}
+            onClick={handlePdf}
+          >
+            ⬇ Download PDF
+          </button>
+        </div>
+
+        {!showAll && (
+          <div className="day-tabs">
+            {dailyLogs.map((d, i) => (
+              <button
+                key={d.date}
+                className={`day-tab ${i === active ? "active" : ""}`}
+                onClick={() => setActive(i)}
+              >
+                Day {i + 1}
+                <small>{d.date}</small>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {showAll
+          ? dailyLogs.map((d, i) => (
+              <LogSheet
+                key={d.date}
+                day={d}
+                index={i}
+                total={dailyLogs.length}
+                meta={meta}
+              />
+            ))
+          : (
+              <LogSheet
+                day={dailyLogs[active]}
+                index={active}
+                total={dailyLogs.length}
+                meta={meta}
+              />
+            )}
+      </div>
+    </div>
+  );
+}
