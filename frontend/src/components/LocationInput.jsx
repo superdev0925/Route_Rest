@@ -7,6 +7,7 @@ import { geocodeSuggest } from "../api";
  */
 export default function LocationInput({
   label,
+  step,
   value,
   onChange,
   placeholder,
@@ -92,7 +93,10 @@ export default function LocationInput({
 
   return (
     <div className="field" ref={wrapRef}>
-      <label>{label}</label>
+      <label>
+        {step && <span className="field-step">{step}</span>}
+        {label}
+      </label>
       <div className="input-wrap autocomplete">
         <span className={`pin ${pinClass}`} />
         <input

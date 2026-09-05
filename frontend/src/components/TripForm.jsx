@@ -1,6 +1,30 @@
 import { useState } from "react";
 import LocationInput from "./LocationInput";
 
+const EXAMPLES = [
+  {
+    name: "Short haul",
+    current_location: "Dallas, Texas",
+    pickup_location: "Austin, Texas",
+    dropoff_location: "Houston, Texas",
+    current_cycle_used: "8",
+  },
+  {
+    name: "Midwest",
+    current_location: "Chicago, Illinois",
+    pickup_location: "St. Louis, Missouri",
+    dropoff_location: "Kansas City, Missouri",
+    current_cycle_used: "18",
+  },
+  {
+    name: "Cross-country",
+    current_location: "Los Angeles, California",
+    pickup_location: "Denver, Colorado",
+    dropoff_location: "Chicago, Illinois",
+    current_cycle_used: "12",
+  },
+];
+
 export default function TripForm({ onSubmit, loading }) {
   const [form, setForm] = useState({
     current_location: "",
@@ -44,6 +68,14 @@ export default function TripForm({ onSubmit, loading }) {
     }
     onSubmit({ ...form, current_cycle_used: cycle });
   };
+
+  const cycleVal = parseFloat(form.current_cycle_used);
+  const cycleUsed = Number.isFinite(cycleVal)
+    ? Math.min(70, Math.max(0, cycleVal))
+    : null;
+  const cycleLeft = cycleUsed == null ? null : Math.max(0, 70 - cycleUsed);
+  const cycleTone =
+    cycleUsed == null ? "" : cycleUsed >= 60 ? "hot" : cycleUsed >= 40 ? "warm" : "ok";
 
   return (
     <form className="card form-hero" onSubmit={submit}>
@@ -101,6 +133,7 @@ export default function TripForm({ onSubmit, loading }) {
 
           <div className="hero-grid">
             <LocationInput
+              step="01"
               label="Current location"
               pinClass="current"
               value={form.current_location}
@@ -108,6 +141,7 @@ export default function TripForm({ onSubmit, loading }) {
               placeholder="Start typing a U.S. city…"
             />
             <LocationInput
+              step="02"
               label="Pickup location"
               pinClass="pickup"
               value={form.pickup_location}
@@ -115,6 +149,7 @@ export default function TripForm({ onSubmit, loading }) {
               placeholder="Start typing a U.S. city…"
             />
             <LocationInput
+              step="03"
               label="Drop-off location"
               pinClass="dropoff"
               value={form.dropoff_location}
@@ -124,6 +159,7 @@ export default function TripForm({ onSubmit, loading }) {
 
             <div className="field">
               <label>
+                <span className="field-step">04</span>
                 Cycle used <span className="hint">(hrs)</span>
               </label>
               <input
@@ -136,12 +172,41 @@ export default function TripForm({ onSubmit, loading }) {
                 onChange={update("current_cycle_used")}
                 placeholder="e.g. 12"
               />
+              <div className={`cycle-meter ${cycleTone}`} aria-hidden={cycleUsed == null}>
+                <div className="cycle-meter-bar">
+                  <div
+                    className="cycle-meter-fill"
+                    style={{ width: `${cycleUsed == null ? 0 : (cycleUsed / 70) * 100}%` }}
+                  />
+                </div>
+                <div className="cycle-meter-legend">
+                  <span>
+                    {cycleUsed == null
+                      ? "0–70 hours already used this cycle"
+                      : `${cycleUsed.toFixed(1)} h used`}
+                  </span>
+                  <span>
+                    {cycleLeft == null ? "70 h limit" : `${cycleLeft.toFixed(1)} h left`}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
-          
-          <p className="field-help">
-            Cycle = on-duty hours used in your last 8 days (0–70).
-          </p>
+
+          <div className="hero-examples">
+            <span className="ex-label">Try a sample</span>
+            {EXAMPLES.map((ex) => (
+              <button
+                key={ex.name}
+                type="button"
+                className="hero-chip"
+                disabled={loading}
+                onClick={() => applyExample(ex)}
+              >
+                {ex.name}
+              </button>
+            ))}
+          </div>
 
           <button className="btn btn-go" type="submit" disabled={loading}>
             <span className="btn-label">
